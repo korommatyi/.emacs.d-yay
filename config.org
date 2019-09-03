@@ -239,16 +239,16 @@ Use TAB to expand snippets. The code snippet below also avoids clashing with com
                   (when (equal my-company-point (point))
                     (yas-expand)))))
 #+END_SRC
-** Markdown mode, JSON mode, Yaml mode
+** Markdown mode, JSON mode, Yaml mode, Dockerfile mode
 Some useful but missing major modes
 #+BEGIN_SRC emacs-lisp
   (use-package markdown-mode :hook (markdown-mode . visual-line-mode))
 
   (use-package json-mode)
 
-  (use-package yaml-mode
-    :mode ("\\.ya?ml\\'" . yaml-mode)
-    )
+  (use-package yaml-mode :mode ("\\.ya?ml\\'" . yaml-mode))
+
+  (use-package dockerfile-mode :mode ("Dockerfile\\'" . dockerfile-mode))
 #+END_SRC
 ** Configure PATH on macOS
 #+BEGIN_SRC emacs-lisp
