@@ -48,5 +48,8 @@
 (require 'org)
 (org-babel-load-file (expand-file-name "~/.emacs.d/config.org"))
 
+(define-key global-map (kbd "M-o") 'other-window)
+(global-linum-mode 1)
+
 (provide 'init)
 ;;; init.el ends here

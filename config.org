@@ -3,8 +3,7 @@
 #+Date: 2019
 * Cleaning up the UI and enhance some basic defaults defined in C Source Code
 #+BEGIN_SRC emacs-lisp
-  (setq frame-title-format '("Yay-Evil") ; Yayyyyy Evil!
-        ring-bell-function 'ignore       ; minimize distraction
+  (setq ring-bell-function 'ignore       ; minimize distraction
         default-directory "~/")
 
   ;; literally every YouTube tutorial starts with this
@@ -29,7 +28,7 @@
 
   ;; Always use spaces for indentation (default to 4 spaces).
   (setq-default indent-tabs-mode nil
-                tab-width 4)
+                tab-width 2)
 #+END_SRC
 * Configuration for built-in packages
 Since we're using use-package as our package management system, we might as well try to organize under the same syntax as much as possible to keep the configuration consistent.
@@ -121,7 +120,7 @@ Maximize the frame by default on start-up. Set the font size to 13.
     :ensure nil
     :config
     (setq initial-frame-alist (quote ((fullscreen . maximized))))
-    (set-frame-font "Menlo-13" nil t))
+    (set-frame-font "Hack" nil t))
 #+END_SRC
 ** Ediff tweaks
 Enter ediff with side-by-side buffers to better compare the differences.
@@ -151,25 +150,6 @@ Electric-pair-mode has improved quite a bit in recent Emacs versions. No longer 
 #+END_SRC
 * Third-party packages
 Many Emacsers love having tons of packages -- and that's absolutely fine! However, one of the goals of the Yay-Evil distro is to provide an essential-only foundation for users to build upon. Therefore, only the most important packages and/or lightweight improvements will be included here. For example, completion frameworks like Ivy or Helm are considered heavy by many, yet the built-in Ido serves almost the same purpose. The only arguably opinionated package is probably Evil, but hey! You saw that coming from the distro name, didn't you ;) ?
-** Evil
-I personally find Vi(m) bindings to be the most efficient way of editing text (especially code). I also changed the default ~:q~ and ~:wq~ to be killing current buffer instead of killing the frame or subsequently killing Emacs.
-#+BEGIN_SRC emacs-lisp
-  (use-package evil
-    :diminish undo-tree-mode
-    :init (setq evil-want-C-u-scroll t)
-    :hook (after-init . evil-mode)
-    :config
-    (with-eval-after-load 'evil-maps ; avoid conflict with company tooltip selection
-      (define-key evil-insert-state-map (kbd "C-n") nil)
-      (define-key evil-insert-state-map (kbd "C-p") nil))
-    (evil-set-initial-state 'term-mode 'emacs)
-    (defun ian/save-and-kill-this-buffer ()
-      (interactive)
-      (save-buffer)
-      (kill-this-buffer))
-    (evil-ex-define-cmd "q" 'kill-this-buffer)
-    (evil-ex-define-cmd "wq" 'ian/save-and-kill-this-buffer))
-#+END_SRC
 ** Dashboard welcome page
 #+BEGIN_SRC emacs-lisp
   (use-package dashboard
@@ -219,7 +199,7 @@ Selecting buffers/files with great efficiency. In my opinion, Ido is enough to r
 ** Magit
 Magit -- need I say more? The best git interface ever.
 #+BEGIN_SRC emacs-lisp
-  (use-package magit :bind ("C-x g" . magit-status))
+  (use-package magit :bind (("C-x g" . magit-status) ("C-c g" . magit-file-dispatch)))
 #+END_SRC
 ** Org Mode
 Some minimal org mode tweaks
@@ -259,12 +239,16 @@ Use TAB to expand snippets. The code snippet below also avoids clashing with com
                   (when (equal my-company-point (point))
                     (yas-expand)))))
 #+END_SRC
-** Markdown mode and JSON mode
+** Markdown mode, JSON mode, Yaml mode
 Some useful but missing major modes
 #+BEGIN_SRC emacs-lisp
   (use-package markdown-mode :hook (markdown-mode . visual-line-mode))
 
   (use-package json-mode)
+
+  (use-package yaml-mode
+    :mode ("\\.ya?ml\\'" . yaml-mode)
+    )
 #+END_SRC
 ** Configure PATH on macOS
 #+BEGIN_SRC emacs-lisp
@@ -277,4 +261,31 @@ Some useful but missing major modes
   (use-package highlight-numbers :hook (prog-mode . highlight-numbers-mode))
   (use-package highlight-operators :hook (prog-mode . highlight-operators-mode))
   (use-package highlight-escape-sequences :hook (prog-mode . hes-mode))
+#+END_SRC
+** Lsp
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-mode
+    :hook ((c-mode
+            c-or-c++-mode
+            java-mode
+            js-mode
+            python-mode
+            web-mode) . lsp)
+    :commands lsp
+    :config
+    (setq lsp-prefer-flymake nil)
+    (setq lsp-enable-symbol-highlighting nil)
+    (use-package lsp-java :after lsp))
+
+  (use-package company-lsp
+    :commands company-lsp
+    :config (setq company-lsp-cache-candidates 'auto))
+
+  (use-package web-mode
+    :mode (("\\.tsx?\\'" . web-mode)
+           ("\\.html?\\'" . web-mode))
+    :config
+    (setq web-mode-markup-indent-offset 2
+          web-mode-code-indent-offset 2
+          web-mode-css-indent-offset 2))
 #+END_SRC
